@@ -1,8 +1,7 @@
-import json
-from DataLoader.DataLoader0_Read import DataLoader0_Read
+from DataLoader.Utils import *
+from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
 def main():
-    r = DataLoader0_Read()
-
+    r = DataLoader0_ReadAnns()
 
 if __name__ == '__main__':
     main()
