@@ -1,7 +1,7 @@
 from DataLoader.Utils import *
-from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
+from DataLoader.DataLoader1_ReadAll import DataLoader1_ReadAll
 def main():
-    r = DataLoader0_ReadAnns()
+    r = DataLoader1_ReadAll()
 
 if __name__ == '__main__':
     main()

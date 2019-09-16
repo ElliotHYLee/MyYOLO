@@ -8,23 +8,23 @@ class DataLoader0_ReadAnns():
         self.data = None
         with open(getTrainAnnPath()) as json_file:
             self.data = json.load(json_file)
-        N = len(self.data)
+        self.N = len(self.data)
         self.numGridX, self.numGridY = 7, 7
         self.imgW, self.imgH = 448, 448
         self.gridW = self.imgW/self.numGridX
         self.gridH = self.imgH/self.numGridY
 
         # for i in range(0, N):
-        i = 123
-        img = self.getImgAt(i)
-        bboxes = self.getBBoxesAt(i)
-        objNames = self.getObjNamesAt(i)
-        objIds = self.getObjIdsAt(i)
-        img, bboxes = self.resize(img, bboxes)
-        offset, relX, relY = self.getBBoxCenter(bboxes)
-        img = self.drawBBox(img, bboxes, objNames)
-        img = self.drawBBoxCenter(img, offset, relX, relY, bboxes.shape[0])
-        self.showImg(img)
+        # i = 123
+        # img = self.getImgAt(i)
+        # bboxes = self.getBBoxesAt(i)
+        # objNames = self.getObjNamesAt(i)
+        # objIds = self.getObjIdsAt(i)
+        # img, bboxes = self.resize(img, bboxes)
+        # offset, relX, relY = self.getBBoxCenter(bboxes)
+        # img = self.drawBBox(img, bboxes, objNames)
+        # img = self.drawBBoxCenter(img, offset, relX, relY, bboxes.shape[0])
+        # self.showImg(img)
 
     def drawBBoxCenter(self, img, offset, relX, relY, N):
         x = offset[:, 0, None] + relX
