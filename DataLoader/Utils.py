@@ -1,4 +1,5 @@
 
+
 def getTrainAnnPath():
     dirTrainAnn = './Data/train.json'
     return dirTrainAnn
@@ -15,3 +16,11 @@ def getImgPath(id):
 
 def getFileName(id):
     return  str(id).zfill(12)
+
+def getEnd(start, N, totalN):
+    end = start+N
+    if end > totalN:
+        end = totalN
+        N = end-start
+    return end, N
+
