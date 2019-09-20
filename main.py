@@ -8,7 +8,7 @@ from DataLoader.Helper_TargetPacker import *
 
 def main():
     r = DataLoader0_ReadAnns()
-    index = 0
+    index = 666
     img, res_bb, objNames, objIds = r.getResizedInfoAt(index)
 
     visG = Visualizer_Global()

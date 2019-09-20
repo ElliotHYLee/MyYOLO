@@ -38,7 +38,7 @@ class TargetUnpacker():
         bboxes[:,0:2] *= 64
         bboxes[:,2:4] *= 448
         offset = 64*np.array(oxyList)
-        return offset, bboxes
+        return offset, bboxes.astype(int)
 
 
 
