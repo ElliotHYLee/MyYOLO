@@ -21,5 +21,5 @@ class Visualizer_Global():
             x, y = bboxes[i, 0], bboxes[i, 1]
             x2, y2 = x + bboxes[i, 2], y + bboxes[i, 3]
             img = cv2.rectangle(img, (x, y), (x2, y2), (0, 0, 255), 2)
-            img = cv2.putText(img, objNames[i], (x, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
+            img = cv2.putText(img, objNames[i], (x, y-5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1, cv2.LINE_AA)
         return img

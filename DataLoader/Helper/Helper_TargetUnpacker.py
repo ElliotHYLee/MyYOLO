@@ -5,16 +5,16 @@ class TargetUnpacker():
     def __init__(self):
         pass
 
-    def unpackTarget(self, label):
+    def unpackTarget(self, label_box):
         bbList = []
         oxyList = []
         for i in range(0, GridParams().numGridX):
             for j in range(0, GridParams().numGridY):
-                for k in range(0, GridParams().numBBox):
-                    flag = label[i, j, k*GridParams().numBBoxElements]
+                for k in range(0, GridParams().limNumBBoxPerGrid):
+                    flag = label_box[i, j, k * GridParams().numBBoxElements]
                     if flag >= 0.5:
                         start = k*GridParams().numBBoxElements + 1
-                        bb = label[i, j, start:start+4]
+                        bb = label_box[i, j, start:start + 4]
                         oxy = np.array([i, j])
                         bbList.append(bb)
                         oxyList.append(oxy)
@@ -32,7 +32,11 @@ class TargetUnpacker():
         objIds = []
         for i in range(0, GridParams().numGridX):
             for j in range(0, GridParams().numGridY):
-                c = np.where(ohc[i,j] == 1)
-                if len(c[0])==1:
-                    objIds.append(c[0][0])
+                for k in range(0, GridParams().limNumBBoxPerGrid):
+                    line = ohc[i,j, k*GridParams().numClass:(k+1)*GridParams().numClass]
+                    c = np.where(line ==1 )[0]
+                    if (c.shape[0])==1:
+                        objIds.append(c[0])
+                    else:
+                        break
         return objIds

@@ -12,8 +12,8 @@ def getValAnnPath():
 
 def getImgPath(id):
     fName = 'COCO_train2014_' + getFileName(id)
-    #dirImgPath = 'D:/DLData/COCO/2014/train2014'
-    dirImgPath = 'E:/COCO/2014/train2014'
+    dirImgPath = 'D:/DLData/COCO/2014/train2014'
+    #dirImgPath = 'E:/COCO/2014/train2014'
     imgFileName = '{}/{}.jpg'.format(dirImgPath, fName)
     return imgFileName
 

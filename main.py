@@ -10,10 +10,13 @@ def main():
     visG = Visualizer_Global()
     unpacker = TargetUnpacker()
     isMoreThanOneObjPerGrid, counter, label_box, label_ohc  = r.getTargetAt(index)
-    ddd = unpacker.ohc2num(label_ohc)
-    print(label_box)
+    objIds = unpacker.ohc2num(label_ohc)
+    #print(label_box)
     offset, bb = unpacker.unpackTarget(label_box)
-    img = visG.drawBBox(img, bb,  r.getNamesFromObjIds(ddd))
+    print(label_box.shape)
+    print(isMoreThanOneObjPerGrid)
+    print(objIds)
+    img = visG.drawBBox(img, bb,  r.getNamesFromObjIds(objIds))
     visG.showImg(img)
 
 

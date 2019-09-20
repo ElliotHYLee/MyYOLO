@@ -1,27 +1,29 @@
 import numpy as np
 from DataLoader.Helper.Helper_Global2Local import Global2Local
 from Params.GridParams import GridParams
-
+import sys
 class TargetPacker():
     def __init__(self):
         self.convG2L = Global2Local()
 
     def packBBoxAndObj(self, res_bb, objIds):
-        res = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numBBoxElements * GridParams().limNumBBoxPerGrid))
+        res = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numBBoxElements * GridParams().numBBox))
         offset, relX, relY = self.convG2L.getBBoxCenter_Absolute(res_bb)
         ox, oy, label = self.convG2L.getBBoxes_Relative(offset, relX, relY, res_bb)
         counter = np.zeros((GridParams().numGridX, GridParams().numGridY), dtype=int)
-        ohc = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numClass * GridParams().limNumBBoxPerGrid), dtype=int)
+        ohc = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numClass * GridParams().numBBox), dtype=int)
         N = res_bb.shape[0]
         for i in range(0, N):
             c = counter[ox[i], oy[i]]
             try:
-                res[ox[i], oy[i], c * GridParams().numBBoxElements: (c + 1) * GridParams().numBBoxElements] = label[i]
-                ohc[ox[i], oy[i], c * GridParams().numClass: (c + 1) * GridParams().numClass] = self.getOneHotCode(objIds[i])
+                if c < GridParams().limNumBBoxPerGrid:
+                    res[ox[i], oy[i], c * GridParams().numBBoxElements: (c + 1) * GridParams().numBBoxElements] = label[i]
+                    ohc[ox[i], oy[i], c * GridParams().numClass: (c + 1) * GridParams().numClass] = self.getOneHotCode(objIds[i])
+                    counter[ox[i], oy[i]] += 1
             except:
-                # more than 1 object per grid will be ignored
-                pass
-            counter[ox[i], oy[i]] += 1
+                print('limNumBBoxPerGrid needs to be <= numBBox')
+                sys.exit(-1)
+
         return counter, res, ohc
 
     def getOneHotCode(self, classId):
