@@ -23,14 +23,14 @@ class TargetPacker():
         counter = np.zeros((GridParams().numGridX, GridParams().numGridY), dtype=int)
         N = res_bb.shape[0]
         for i in range(0, N):
-            c = counter[ox[i, 0], oy[i, 0]]
+            c = counter[ox[i], oy[i]]
             try:
-                res[ox[i, 0], oy[i, 0], c * GridParams().numBBoxElements: (c + 1) * GridParams().numBBoxElements] = label[i]
+                res[ox[i], oy[i], c * GridParams().numBBoxElements: (c + 1) * GridParams().numBBoxElements] = label[i]
             except:
                 print('Error: Helper_TargetPacker in packBBox()')
                 sys.exit('Probably, increase the number of bounding boxes.')
 
-            counter[ox[i, 0], oy[i, 0]] += 1
+            counter[ox[i], oy[i]] += 1
         return counter, res
 
     def getOneHotCode(self, classId):

@@ -47,7 +47,7 @@ class Global2Local():
 
     def getBBoxes_Relative(self, offset, relX, relY, bboxes):
         label = np.zeros((bboxes.shape[0], GridParams().numBBoxElements))
-        ox, oy = np.zeros(((bboxes.shape[0], 1)), dtype=int), np.zeros(((bboxes.shape[0], 1)), dtype=int)
+        ox, oy = np.zeros(((bboxes.shape[0])), dtype=int), np.zeros(((bboxes.shape[0])), dtype=int)
         for i in range(0, bboxes.shape[0]):
             x = int(offset[i, 0] / self.gridW)
             y = int(offset[i, 1] / self.gridH)
