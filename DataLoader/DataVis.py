@@ -1,21 +1,20 @@
 import cv2
 
-class Visualizer():
+class Visualizer_Global():
     def __init__(self):
         pass
 
-
     def showImg(self, img, name='asdf'):
         cv2.imshow(name, img)
-        cv2.waitKey(5000)
+        cv2.waitKey(10000)
 
-    def drawBBoxCenter(self, img, offset, relX, relY, N):
+    def drawBBoxCenter(self, img, offset, relX, relY):
         x = offset[:, 0, None] + relX
         y = offset[:, 1, None] + relY
+        N = offset.shape[0]
         for i in range(0, N):
-            img = cv2.circle(img, (x[i], y[i]), 4, (0, 0, 255), -1)
+            img = cv2.circle(img, (x[i], y[i]), 4, (255, 0, 0), -1)
         return img
-
 
     def drawBBox(self, img, bboxes, objNames):
         for i in range(0, bboxes.shape[0]):
