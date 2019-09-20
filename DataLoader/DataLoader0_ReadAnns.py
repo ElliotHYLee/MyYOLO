@@ -2,8 +2,9 @@ from DataLoader.Utils import *
 import json
 import cv2
 import numpy as np
-from DataLoader.Helper_Global2Local import Global2Local
-from DataLoader.Helper_TargetPacker import TargetPacker
+from DataLoader.Helper.Helper_Global2Local import Global2Local
+from DataLoader.Helper.Helper_TargetPacker import TargetPacker
+import pandas as pd
 
 class DataLoader0_ReadAnns():
     def __init__(self):
@@ -12,6 +13,7 @@ class DataLoader0_ReadAnns():
         self.packer = TargetPacker()
         with open(getTrainAnnPath()) as json_file:
             self.data = json.load(json_file)
+        self.catNames = pd.read_csv(getCatNamePath())["CatIds"].str.join("")
         self.N = len(self.data)
 
     def getImgAt(self, i):
@@ -31,15 +33,25 @@ class DataLoader0_ReadAnns():
     def getTargetAt(self, i):
         img = self.getImgAt(i)
         bboxes = self.getBBoxesAt(i)
+        objIds = self.getObjIdsAt(i)
         img, res_bb = self.conv_g2l.resize(img, bboxes)
-        counter, label = self.packer.packTarget(res_bb)
-        return counter, label
+        counter, label_box, label_ohc = self.packer.packBBoxAndObj(res_bb, objIds)
+        return self.packer.isMoreThanOneObjPerGrid(counter), counter, label_box, label_ohc
 
     def printAnnsAt(self, i):
         print(self.getImgIdAt(i))
         print(self.getObjIdsAt(i))
         print(self.getObjNamesAt(i))
         print(self.getBBoxesAt(i))
+
+    def getNamesFromObjIds(self, objIds):
+        res = []
+        for i in range(0, len(objIds)):
+            res.append(self.getNameFromObjId(objIds[i]))
+        return res
+
+    def getNameFromObjId(self, objId):
+        return self.catNames[objId-1]
 
     def getImgIdAt(self, i):
         return self.data[i]['imgId']
@@ -52,3 +64,4 @@ class DataLoader0_ReadAnns():
 
     def getObjNamesAt(self, i):
         return self.data[i]['objName']
+

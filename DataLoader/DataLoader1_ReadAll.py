@@ -1,5 +1,5 @@
 from DataLoader.DataLoader0_ReadAnns import *
-from DataLoader.Helper_Global2Local import Global2Local
+from DataLoader.Helper.Helper_Global2Local import Global2Local
 import threading
 
 

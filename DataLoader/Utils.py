@@ -1,4 +1,6 @@
 
+def getCatNamePath():
+    return './Data/objNames.txt'
 
 def getTrainAnnPath():
     dirTrainAnn = './Data/train.json'

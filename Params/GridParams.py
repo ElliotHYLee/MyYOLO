@@ -8,7 +8,8 @@ class Singleton:
 class GridParams(Singleton):
     def __init__(self):
         self.numClass = 100
-        self.numBBox = 10
+        self.numBBox = 1
+        self.limNumBBoxPerGrid = 1
         self.numBBoxElements = 5
         self.numGridX, self.numGridY = 7, 7
         self.imgW, self.imgH = 448, 448

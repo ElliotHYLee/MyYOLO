@@ -28,5 +28,11 @@ class TargetUnpacker():
 
         return offset, bboxes.astype(int)
 
-
-
+    def ohc2num(self, ohc):
+        objIds = []
+        for i in range(0, GridParams().numGridX):
+            for j in range(0, GridParams().numGridY):
+                c = np.where(ohc[i,j] == 1)
+                if len(c[0])==1:
+                    objIds.append(c[0][0])
+        return objIds
