@@ -2,7 +2,6 @@ import numpy as np
 from DataLoader.Helper.Helper_Global2Local import Global2Local
 from Params.GridParams import GridParams
 
-
 class TargetPacker():
     def __init__(self):
         self.convG2L = Global2Local()
