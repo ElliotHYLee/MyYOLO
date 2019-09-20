@@ -1,44 +1,41 @@
 import numpy as np
 from DataLoader.Helper_Global2Local import Global2Local
-
+from Params.GridParams import GridParams
+import sys
 class TargetPacker():
     def __init__(self):
         self.convG2L = Global2Local()
 
     def packTarget(self, res_bb):
-        res = np.zeros((7, 7, 5 * 10))
+        counter, label  = self.packBBox(res_bb)
+        return counter, label
+
+    def packObjIds(self, objIds):
+        N = objIds.shape[0]
+        och = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numClass))
+        for i in range(0, N):
+            pass
+
+    def packBBox(self, res_bb):
+        res = np.zeros((GridParams().numGridX, GridParams().numGridY, GridParams().numBBoxElements * GridParams().numBBox))
         offset, relX, relY = self.convG2L.getBBoxCenter_Absolute(res_bb)
         ox, oy, label = self.convG2L.getBBoxes_Relative(offset, relX, relY, res_bb)
-        counter = np.zeros((7, 7, 1), dtype=int)
+        counter = np.zeros((GridParams().numGridX, GridParams().numGridY), dtype=int)
         N = res_bb.shape[0]
         for i in range(0, N):
-            c = counter[ox[i, 0], oy[i, 0], 0]
-            res[ox[i, 0], oy[i, 0], c * 5 : (c + 1) * 5] = label[i]
-            counter[ox[i, 0], oy[i, 0], 0] += 1
-        return res
+            c = counter[ox[i, 0], oy[i, 0]]
+            try:
+                res[ox[i, 0], oy[i, 0], c * GridParams().numBBoxElements: (c + 1) * GridParams().numBBoxElements] = label[i]
+            except:
+                print('Error: Helper_TargetPacker in packBBox()')
+                sys.exit('Probably, increase the number of bounding boxes.')
 
-class TargetUnpacker():
-    def __init__(self):
-        pass
+            counter[ox[i, 0], oy[i, 0]] += 1
+        return counter, res
 
-    def unpackTarget(self, label):
-        bbList = []
-        oxyList = []
-        for i in range(0, 7):
-            for j in range(0, 7):
-                for k in range(0, 10):
-                    flag = label[i, j, k*5]
-                    if flag >= 0.4:
-                        start = k*5 + 1
-                        bb = label[i, j, start:start+4]
-                        oxy = np.array([i, j])
-                        bbList.append(bb)
-                        oxyList.append(oxy)
-        bboxes = np.array(bbList)
-        bboxes[:,0:2] *= 64
-        bboxes[:,2:4] *= 448
-        offset = 64*np.array(oxyList)
-        return offset, bboxes.astype(int)
-
+    def getOneHotCode(self, classId):
+        ohc = np.zeros((1, 100))
+        ohc[classId] = 1
+        return ohc
 
 

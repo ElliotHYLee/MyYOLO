@@ -1,12 +1,13 @@
 import cv2
 import numpy as np
+from Params.GridParams import GridParams
 
 class Global2Local():
     def __init__(self):
-        self.numGridX, self.numGridY = 7, 7
-        self.imgW, self.imgH = 448, 448
-        self.gridW = self.imgW / self.numGridX
-        self.gridH = self.imgH / self.numGridY
+        self.numGridX, self.numGridY = GridParams().numGridX, GridParams().numGridY
+        self.imgW, self.imgH = GridParams().imgW, GridParams().imgH
+        self.gridW = GridParams().gridW
+        self.gridH = GridParams().gridH
 
     def getBBoxCenter_Absolute(self, bboxes):
         if bboxes.shape[0] > 0:
@@ -45,7 +46,7 @@ class Global2Local():
         return bboxes
 
     def getBBoxes_Relative(self, offset, relX, relY, bboxes):
-        label = np.zeros((bboxes.shape[0], 5))
+        label = np.zeros((bboxes.shape[0], GridParams().numBBoxElements))
         ox, oy = np.zeros(((bboxes.shape[0], 1)), dtype=int), np.zeros(((bboxes.shape[0], 1)), dtype=int)
         for i in range(0, bboxes.shape[0]):
             x = int(offset[i, 0] / self.gridW)
@@ -56,5 +57,5 @@ class Global2Local():
 
             ox[i] = x
             oy[i] = y
-            label[i,:] = np.array([1, relX[i] / 64, relY[i] / 64, w, h])
+            label[i,:] = np.array([1, relX[i] / GridParams().gridW, relY[i] / GridParams().gridW, w, h])
         return ox, oy, label

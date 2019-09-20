@@ -32,8 +32,8 @@ class DataLoader0_ReadAnns():
         img = self.getImgAt(i)
         bboxes = self.getBBoxesAt(i)
         img, res_bb = self.conv_g2l.resize(img, bboxes)
-        label = self.packer.packTarget(res_bb)
-        return label
+        counter, label = self.packer.packTarget(res_bb)
+        return counter, label
 
     def printAnnsAt(self, i):
         print(self.getImgIdAt(i))
