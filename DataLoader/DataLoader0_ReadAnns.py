@@ -19,7 +19,7 @@ class DataLoader0_ReadAnns():
     def getImgAt(self, i):
         imgId = self.getImgIdAt(i)
         imgPath = getImgPath(imgId)
-        img = cv2.imread(imgPath)
+        img = cv2.imread(imgPath) / 255.0
         return img
 
     def getResizedInfoAt(self, i):
