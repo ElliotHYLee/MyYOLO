@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from Params.GridParams import GridParams
-
+import sys
 class Global2Local():
     def __init__(self):
         self.numGridX, self.numGridY = GridParams().numGridX, GridParams().numGridY
@@ -58,4 +58,5 @@ class Global2Local():
             ox[i] = x
             oy[i] = y
             label[i,:] = np.array([1, relX[i] / GridParams().gridW, relY[i] / GridParams().gridW, w, h])
+
         return ox, oy, label

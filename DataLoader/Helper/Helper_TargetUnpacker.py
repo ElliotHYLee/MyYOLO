@@ -5,7 +5,8 @@ class TargetUnpacker():
     def __init__(self):
         pass
 
-    def unpackTarget(self, label_box):
+    # returns offset in global value and x, y, w, h
+    def unpackBBoxLabel(self, label_box):
         bbList = []
         oxyList = []
         for i in range(0, GridParams().numGridX):
@@ -25,18 +26,24 @@ class TargetUnpacker():
         bboxes = bb_centers_wh
         bboxes[:, 0] += offset[:, 0] - bboxes[:, 2]/2
         bboxes[:, 1] += offset[:, 1] - bboxes[:, 3]/2
-
         return offset, bboxes.astype(int)
 
-    def ohc2num(self, ohc):
+    def unpackOHCLabel(self, label_ohc):
         objIds = []
         for i in range(0, GridParams().numGridX):
             for j in range(0, GridParams().numGridY):
                 for k in range(0, GridParams().limNumBBoxPerGrid):
-                    line = ohc[i,j, k*GridParams().numClass:(k+1)*GridParams().numClass]
+                    line = label_ohc[i, j, k * GridParams().numClass:(k + 1) * GridParams().numClass]
                     c = np.where(line ==1 )[0]
                     if (c.shape[0])==1:
                         objIds.append(c[0])
                     else:
                         break
         return objIds
+
+    def unpackLabel(self, label):
+        label_ohc = np.reshape(label[:, :, :, GridParams().numBBox:], (GridParams().numGridX, GridParams().numGridY, GridParams().numBBox * GridParams().numClass))
+        label_box = np.reshape(label[:, :, :, 0:GridParams().numBBox], (GridParams().numGridX, GridParams().numGridY, GridParams().numBBox * GridParams().numBBoxElements))
+        objIds = self.unpackOHCLabel(label_ohc)
+        offset, bb = self.unpackBBoxLabel(label_box)
+        return objIds, offset, bb

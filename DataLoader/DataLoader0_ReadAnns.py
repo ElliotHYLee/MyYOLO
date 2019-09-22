@@ -3,14 +3,14 @@ import json
 import cv2
 import numpy as np
 from DataLoader.Helper.Helper_Global2Local import Global2Local
-from DataLoader.Helper.Helper_TargetPacker import TargetPacker
+from DataLoader.Helper.Helper_TargetPacker import *
 import pandas as pd
 
 class DataLoader0_ReadAnns():
     def __init__(self):
         self.data = None
         self.conv_g2l = Global2Local()
-        self.packer = TargetPacker()
+        self.packer = TargetPacker4D()
         with open(getTrainAnnPath()) as json_file:
             self.data = json.load(json_file)
         self.catNames = pd.read_csv(getCatNamePath())["CatIds"].str.join("")
@@ -35,8 +35,8 @@ class DataLoader0_ReadAnns():
         bboxes = self.getBBoxesAt(i)
         objIds = self.getObjIdsAt(i)
         img, res_bb = self.conv_g2l.resize(img, bboxes)
-        counter, label_box, label_ohc = self.packer.packBBoxAndObj(res_bb, objIds)
-        return self.packer.isMoreThanOneObjPerGrid(counter), counter, label_box, label_ohc
+        counter, label = self.packer.packBBoxAndObj(res_bb, objIds)
+        return self.packer.isMoreThanOneObjPerGrid(counter), counter, label
 
     def printAnnsAt(self, i):
         print(self.getImgIdAt(i))
@@ -64,4 +64,3 @@ class DataLoader0_ReadAnns():
 
     def getObjNamesAt(self, i):
         return self.data[i]['objName']
-
