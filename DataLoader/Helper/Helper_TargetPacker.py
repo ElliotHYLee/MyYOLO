@@ -46,7 +46,7 @@ class TargetPacker4D():
         offset, relX, relY = self.convG2L.getBBoxCenter_Absolute(res_bb)
 
         ox, oy, label_box = self.convG2L.getBBoxes_Relative(offset, relX, relY, res_bb)
-        print(label_box.shape)
+        #print(label_box.shape)
         counter = np.zeros((GridParams().numGridX, GridParams().numGridY), dtype=int)
         for i in range(0, res_bb.shape[0]):
             c = counter[ox[i], oy[i]]

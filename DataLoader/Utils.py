@@ -1,3 +1,4 @@
+import numpy as np
 
 def getCatNamePath():
     return './Data/objNames.txt'
@@ -26,4 +27,7 @@ def getEnd(start, N, totalN):
         end = totalN
         N = end-start
     return end, N
+
+def getNumThread(totalN, partN):
+    return int(totalN / partN) if np.mod(totalN, partN) == 0 else int(totalN / partN) + 1
 

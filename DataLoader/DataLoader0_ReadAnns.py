@@ -36,7 +36,7 @@ class DataLoader0_ReadAnns():
         objIds = self.getObjIdsAt(i)
         img, res_bb = self.conv_g2l.resize(img, bboxes)
         counter, label = self.packer.packBBoxAndObj(res_bb, objIds)
-        return self.packer.isMoreThanOneObjPerGrid(counter), counter, label
+        return img, objIds, self.packer.isMoreThanOneObjPerGrid(counter), counter, label
 
     def printAnnsAt(self, i):
         print(self.getImgIdAt(i))
