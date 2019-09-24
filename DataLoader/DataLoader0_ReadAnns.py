@@ -13,7 +13,6 @@ class DataLoader0_ReadAnns():
         self.packer = TargetPacker4D()
         with open(getTrainAnnPath()) as json_file:
             self.data = json.load(json_file)
-        self.catNames = pd.read_csv(getCatNamePath())["CatIds"].str.join("")
         self.N = len(self.data)
 
     def getImgAt(self, i):
@@ -43,15 +42,6 @@ class DataLoader0_ReadAnns():
         print(self.getObjIdsAt(i))
         print(self.getObjNamesAt(i))
         print(self.getBBoxesAt(i))
-
-    def getNamesFromObjIds(self, objIds):
-        res = []
-        for i in range(0, len(objIds)):
-            res.append(self.getNameFromObjId(objIds[i]))
-        return res
-
-    def getNameFromObjId(self, objId):
-        return self.catNames[objId-1]
 
     def getImgIdAt(self, i):
         return self.data[i]['imgId']

@@ -31,3 +31,8 @@ def getEnd(start, N, totalN):
 def getNumThread(totalN, partN):
     return int(totalN / partN) if np.mod(totalN, partN) == 0 else int(totalN / partN) + 1
 
+def getBranchName():
+    return 'master'
+
+def getNormPath():
+    pass

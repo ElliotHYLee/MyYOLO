@@ -1,10 +1,4 @@
-class Singleton:
-    __instance = None
-    def __new__(cls, *args, **kwargs):
-        if not cls.__instance:
-            cls.__instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
-        return cls.__instance
-
+from Common.CommonClasses import Singleton
 class GridParams(Singleton):
     def __init__(self):
         self.numClass = 100
@@ -16,6 +10,3 @@ class GridParams(Singleton):
         self.imgW, self.imgH = 448, 448
         self.gridW = self.imgW / self.numGridX
         self.gridH = self.imgH / self.numGridY
-
-
-

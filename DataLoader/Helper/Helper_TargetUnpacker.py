@@ -20,13 +20,19 @@ class TargetUnpacker():
                         bbList.append(bb)
                         oxyList.append(oxy)
         bb_centers_wh = np.array(bbList)
-        bb_centers_wh[:,0:2] *= GridParams().gridW
-        bb_centers_wh[:,2:4] *= GridParams().imgW
-        offset = GridParams().gridW*np.array(oxyList)
-        bboxes = bb_centers_wh
-        bboxes[:, 0] += offset[:, 0] - bboxes[:, 2]/2
-        bboxes[:, 1] += offset[:, 1] - bboxes[:, 3]/2
-        return offset, bboxes.astype(int)
+        offset = None
+        bboxes = None
+        try:
+            bb_centers_wh[:,0:2] *= GridParams().gridW
+            bb_centers_wh[:,2:4] *= GridParams().imgW
+
+            offset = GridParams().gridW*np.array(oxyList)
+            bboxes = bb_centers_wh
+            bboxes[:, 0] += offset[:, 0] - bboxes[:, 2]/2
+            bboxes[:, 1] += offset[:, 1] - bboxes[:, 3]/2
+        except:
+            print(bb_centers_wh.shape)
+        return offset, bboxes.astype(int) if bboxes is not None else None
 
     def unpackOHCLabel(self, label_ohc):
         objIds = []

@@ -17,6 +17,8 @@ class Visualizer_Global():
         return img
 
     def drawBBox(self, img, bboxes, objNames):
+        if bboxes is None:
+            return img
         for i in range(0, bboxes.shape[0]):
             x, y = bboxes[i, 0], bboxes[i, 1]
             x2, y2 = x + bboxes[i, 2], y + bboxes[i, 3]

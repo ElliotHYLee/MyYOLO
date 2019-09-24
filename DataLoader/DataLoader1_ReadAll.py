@@ -1,6 +1,7 @@
 from DataLoader.DataLoader0_ReadAnns import *
 from DataLoader.Helper.Helper_Global2Local import Global2Local
 import threading
+from Common.CommonClasses import *
 
 class DataLoader1_ReadAll():
     def __init__(self, start=0, N=1000):
@@ -22,14 +23,16 @@ class DataLoader1_ReadAll():
             img, objIds, isMoreThanOneObjPerGrid, counter, label = self.anns.getTargetAt(i + self.beginAt)
             self.imgList[i] = img
             self.dataLabel[i,:] = label
-            if np.mod(i, 100) == 0:
-                print(i)
+            # if np.mod(i, 100) == 0:
+            #     print(i)
+        print("Done Reading imgs from %d to %d" %(start, end))
 
     def getDataLable(self):
+        print("Allocating threads to read imgs")
         partN = 500
         #nThread = int(self.anns.N/partN) + 1
         nThread = getNumThread(self.totalN, partN)
-        print(nThread)
+        #print(nThread)
         threads=[]
         for i in range(0, nThread):
             start = i*partN
@@ -39,7 +42,6 @@ class DataLoader1_ReadAll():
 
         for thread in threads:
             thread.join()
-
 
 if __name__ == '__main__':
     from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
@@ -65,6 +67,6 @@ if __name__ == '__main__':
     print(label.shape)
     fakebbs = np.ones_like(bb) * 5 + bb
     iou = c.getIOU(fakebbs, bb)
-    img = visG.drawBBox(img, fakebbs, r.getNamesFromObjIds(objIds))
-    img = visG.drawBBox(img, bb, r.getNamesFromObjIds(objIds))
+    img = visG.drawBBox(img, fakebbs, YOLOObjects().getNamesFromObjIds(objIds))
+    img = visG.drawBBox(img, bb, YOLOObjects().getNamesFromObjIds(objIds))
     visG.showImg(img)
