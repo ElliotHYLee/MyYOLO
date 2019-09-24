@@ -55,6 +55,7 @@ if __name__ == '__main__':
     for batch_idx, (img, label) in enumerate(trainLoader):
         img = img.data.numpy()
         label = label.data.numpy()
+        print(label.shape)
         sum += img.shape[0]
 
         for i in range(img.shape[0]):
