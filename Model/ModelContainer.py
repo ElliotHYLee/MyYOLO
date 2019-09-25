@@ -5,7 +5,7 @@ class ModelContainerGNet(AbsModelContainer):
         super().__init__(model, wName)
         self.bn = 0
         self.optimizer = optim.RMSprop(model.parameters(), lr=10 ** -3, weight_decay=10 ** -3)
-        self.loss = nn.modules.loss.L1Loss()
+        self.loss = nn.modules.loss.BCELoss()
 
     def forwardProp(self, dataInTuple):
         pass

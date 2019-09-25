@@ -18,7 +18,7 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
-        x = F.log_softmax(self.fc4(x), dim=1)
+        x = F.softmax(self.fc4(x), dim=1)
         return x
 
 def main():
@@ -54,7 +54,7 @@ def main():
     for i in range(0, 2000):
         optimizer.zero_grad()
         predY =  m.forward(torchX)
-        loss = F.poisson_nll_loss(predY, torchOhC.type(torch.float))
+        loss = F.binary_cross_entropy(predY.type(torch.float), torchOhC.type(torch.float))
         loss.backward()
         optimizer.step()
 
@@ -65,7 +65,6 @@ def main():
     predY = (torchPredY.argmax(dim=1)).cpu().numpy()
     error = np.abs(predY - y)
     print(collections.Counter(error))
-
 
 if __name__ == '__main__':
     main()
