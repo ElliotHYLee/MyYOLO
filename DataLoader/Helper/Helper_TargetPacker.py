@@ -56,8 +56,8 @@ class TargetPacker4D():
                 counter[ox[i], oy[i]] += 1
         return counter, label
 
-    def getOneHotCode(self, classId):
-        ohc = np.zeros((100), dtype=int)
+    def getOneHotCode(self, classId, dim = 100):
+        ohc = np.zeros((dim), dtype=int)
         ohc[classId] = 1
         return ohc
 
