@@ -1,7 +1,4 @@
 from DataLoader.DataLoader1_ReadAll import DataLoader1_ReadAll
-import numpy as np
-from Params.GridParams import *
-from DataLoader.Utils import *
 from Common.CommonClasses import *
 
 class DataLoader2_Prep(Singleton):
@@ -48,8 +45,7 @@ if __name__ == '__main__':
     from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
     from DataLoader.DataVis import *
     from DataLoader.Helper.Helper_TargetUnpacker import *
-    from Calculation import Calculation
-    import time
+    from Common.Calculation import Calculation
 
     r = DataLoader0_ReadAnns()
     visG = Visualizer_Global()

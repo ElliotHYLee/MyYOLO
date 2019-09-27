@@ -1,4 +1,3 @@
-from DataLoader.DataLoader0_ReadAnns import *
 from DataLoader.Helper.Helper_Global2Local import Global2Local
 import threading
 from Common.CommonClasses import *
@@ -47,7 +46,7 @@ if __name__ == '__main__':
     from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
     from DataLoader.DataVis import *
     from DataLoader.Helper.Helper_TargetUnpacker import *
-    from Calculation import Calculation
+    from Common.Calculation import Calculation
     import time
 
     r = DataLoader0_ReadAnns()

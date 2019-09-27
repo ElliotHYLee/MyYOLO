@@ -5,6 +5,7 @@ import torch.optim as optim
 import numpy as np
 import collections
 from DataLoader.Helper.Helper_TargetPacker import *
+from Common.TooBox import *
 
 class Net(nn.Module):
     def __init__(self):
@@ -41,20 +42,25 @@ def main():
     for i in range(0, N):
         ohc[i,:] = packer.getOneHotCode(y[i], dim = 3)
 
+    tb = ToolBox()
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    torchX = torch.from_numpy(x).to(device)
-    torchY = torch.from_numpy(y).to(device)
-    torchOhC = torch.from_numpy(ohc).to(device)
+    torchX = tb.np2gpu_float(x)
+    torchY = tb.np2gpu_float(y)
+    torchOhC = tb.np2gpu_float(ohc)
 
     m = nn.DataParallel(Net()).to(device)
     m.train()
     optimizer = optim.SGD(m.parameters(), lr=10**-1, weight_decay=10**-4)
 
+    myLoss = nn.modules.loss.BCELoss()
     print('training...')
     for i in range(0, 2000):
         optimizer.zero_grad()
         predY =  m.forward(torchX)
-        loss = F.binary_cross_entropy(predY.type(torch.float), torchOhC.type(torch.float))
+        loss = myLoss(predY, torchOhC)
+
+        #loss = F.nll_loss(predY, tb.t2t_ohc2index(torchOhC))
         loss.backward()
         optimizer.step()
 
@@ -62,7 +68,7 @@ def main():
         m.eval()
         torchPredY = m.forward(torchX)
 
-    predY = (torchPredY.argmax(dim=1)).cpu().numpy()
+    predY = tb.gpu2np(tb.t2t_ohc2index(torchPredY))
     error = np.abs(predY - y)
     print(collections.Counter(error))
 

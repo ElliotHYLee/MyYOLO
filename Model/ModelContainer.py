@@ -1,4 +1,5 @@
 from MyPyTorchAPI.AbsModelContainer import *
+from Common.TooBox import *
 
 class ModelContainerGNet(AbsModelContainer):
     def __init__(self, model, wName='Weights/main'):
@@ -6,14 +7,18 @@ class ModelContainerGNet(AbsModelContainer):
         self.bn = 0
         self.optimizer = optim.RMSprop(model.parameters(), lr=10 ** -3, weight_decay=10 ** -3)
         self.loss = nn.modules.loss.BCELoss()
+        self.tb = ToolBox()
 
     def forwardProp(self, dataInTuple):
-        pass
+        (x, y) = dataInTuple
+        self.x, self.y = self.tb.np2gpu_float(x), self.tb.np2gpu_float(y)
+        self.bboxOut, self.classOut = self.model(x)
         # (x, y, u) = dataInTuple
         # self.x, self.y, self.u = self.toGPU(x, y, u)
         # self.pr, self.A, self.B = self.model(x, u)
 
     def getLoss(self):
+        #loss = self.loss(self.)
         pass
         # loss = self.loss(self.pr[:, 0, None], self.y[:, 0, None]) + \
         # 1 * self.loss(self.pr[:, 1, None], self.y[:, 1, None])

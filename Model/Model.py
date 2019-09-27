@@ -39,7 +39,7 @@ class Model_CNN_0(nn.Module):
         )
         self.encoder = seq1.block
         NN_size = int(seq1.flattend_size)
-        self.classOut = nn.Sequential(Conv2DBlock(1024, 5 * 100, kernel=1, stride=1, padding=0, atvn=None, bn=False, dropout=False).block)
+        self.classOut = nn.Sequential(Conv2DBlock(1024, 5 * 100, kernel=1, stride=1, padding=0, atvn='prlu', bn=False, dropout=False).block)
         self.bboxOut = nn.Sequential(Conv2DBlock(1024, 5 * 5, kernel=1, stride=1, padding=0, atvn=None, bn=True, dropout=True).block)
         self.init_w()
 
@@ -58,17 +58,19 @@ class Model_CNN_0(nn.Module):
     def forward(self, img):
         input = torch.reshape(img, (-1, 3, 448, 448))
         x = self.encoder(input)
-        classOut = self.classOut(x)
-        classOut = torch.reshape(classOut, (-1, 7, 7, 5, 100))
         bboxOut = self.bboxOut(x)
         bboxOut = torch.reshape(bboxOut, (-1, 7, 7, 5, 5))
+        classOut = self.classOut(x)
+        classOut = bboxOut[:, :, :, :, 0, None] * torch.reshape(classOut, (-1, 7, 7, 5, 100))
+        classOut = F.softmax(classOut, dim=4)
         return bboxOut, classOut
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     m = nn.DataParallel(Model_CNN_0()).to(device)
-    img1 = torch.zeros((10, 3, 448, 448), dtype=torch.float).cuda()
-    bboxOut, classOUt= m.forward(img1)
+    img1 = torch.ones((10, 3, 448, 448), dtype=torch.float).cuda()
+    bboxOut, classOut= m.forward(img1)
     print(bboxOut.shape)
+    print(classOut.shape)
     # du, dw, dtr, du_cov, dw_cov, dtr_cov = m.forward(img1, img2)
     # print(m)
