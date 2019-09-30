@@ -1,6 +1,11 @@
 from DataLoader.Helper.Helper_Global2Local import Global2Local
 import threading
 from Common.CommonClasses import *
+from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
+from DataLoader.DataVis import *
+from DataLoader.Helper.Helper_TargetUnpacker import *
+from Common.Calculation import Calculation
+import time
 
 class DataLoader1_ReadAll():
     def __init__(self, start=0, N=1000):
@@ -43,11 +48,7 @@ class DataLoader1_ReadAll():
             thread.join()
 
 if __name__ == '__main__':
-    from DataLoader.DataLoader0_ReadAnns import DataLoader0_ReadAnns
-    from DataLoader.DataVis import *
-    from DataLoader.Helper.Helper_TargetUnpacker import *
-    from Common.Calculation import Calculation
-    import time
+
 
     r = DataLoader0_ReadAnns()
     visG = Visualizer_Global()

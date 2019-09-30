@@ -11,6 +11,9 @@ class ToolBox():
     def np2gpu_float(self, x):
         return self.np2gpu(x).type(torch.float)
 
+    def t2gpu(self, x):
+        return x.to(self.device, dtype=torch.float)
+
     def gpu2np(self, x):
         return x.cpu().numpy()
 

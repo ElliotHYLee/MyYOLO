@@ -19,7 +19,8 @@ class Visualizer_Global():
     def drawBBox(self, img, bboxes, objNames):
         if bboxes is None:
             return img
-        for i in range(0, bboxes.shape[0]):
+        N = len(objNames)
+        for i in range(0, N):
             x, y = bboxes[i, 0], bboxes[i, 1]
             x2, y2 = x + bboxes[i, 2], y + bboxes[i, 3]
             img = cv2.rectangle(img, (x, y), (x2, y2), (0, 0, 255), 2)
