@@ -9,7 +9,7 @@ from Common.TooBox import ToolBox
 np.random.seed(999)
 numBoxes = 1
 w, h = 16 / 448.0, 16 / 448.0
-N = 2
+N = 32
 
 def id2oh(id):
     return [1, 0] if id == 0 else [0, 1]
@@ -70,7 +70,6 @@ def unpackLable(label):
 
 def genImage(bboxes):
     imgs = np.zeros((N, 448, 448, 3))
-    #imgs = darwGrids(imgs)
     for n in range(0, N):
         for i in range(0, bboxes.shape[1]):
             info = bboxes[n, i].astype(np.int)
@@ -78,7 +77,7 @@ def genImage(bboxes):
             if x<=0 and y <=0:
                 continue
             else:
-                imgs[n] = cv2.circle(imgs[n], (x, y), 5, (0, 255, 0), -1)
+                imgs[n] = cv2.circle(imgs[n], (x, y), 14, (0, 255, 0), -1)
     return imgs
 
 def drawRect(imgs, bboxes, isGT=True):

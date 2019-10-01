@@ -4,6 +4,7 @@ label = makeLabel()
 bboxes = unpackLable(label)
 imgs = genImage(bboxes)
 
+print(bboxes.shape)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -15,8 +16,8 @@ model.train()
 tb  = ToolBox()
 input = tb.np2gpu(imgs.copy())
 target = tb.np2gpu(label)
-epoch = 200
-optimizer = torch.optim.SGD(model.parameters(), lr=10 ** -4, weight_decay= 0)
+epoch = 10000
+optimizer = torch.optim.SGD(model.parameters(), lr=10 ** -3, weight_decay= 0)
 lossMSE = nn.modules.loss.MSELoss()
 for i in range(0, epoch):
     p_bb, p_class = model.forward(input)
@@ -35,10 +36,12 @@ p_bboxes = unpackLable(p_label)
 p_bboxes[:,:, 2:] = 16
 
 
+
 imgs = drawRect(imgs, bboxes)
 imgs = drawRect(imgs, p_bboxes, False)
 imgs = darwGrids(imgs)
-cv2.imshow('asdf', imgs[0])
-cv2.waitKey(100000)
+for i in range(0, 32):
+    cv2.imshow('asdf', imgs[i])
+    cv2.waitKey(10000)
 
 

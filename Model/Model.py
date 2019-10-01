@@ -8,10 +8,10 @@ class Model_CNN_0(nn.Module):
         input_channel = 3
         input_size = (input_channel, 448, 448)
         seq1 = MySeqModel(input_size, [
-            Conv2DBlock(input_channel, 32, kernel=3, stride = 1, padding = 0, atvn='prlu', bn = True, dropout=True),
+            Conv2DBlock(input_channel, 32, kernel=3, stride = 1, padding = 0, atvn='prlu', bn = True, dropout=False),
             MaxPool2DBlock(32, kernel = 2, stride = 2, padding = 0),
 
-            Conv2DBlock(32, 64, kernel=3, stride=1, padding = 0, atvn='prlu', bn = True, dropout=True),
+            Conv2DBlock(32, 64, kernel=3, stride=1, padding = 0, atvn='prlu', bn = True, dropout=False),
             MaxPool2DBlock(64, kernel=2, stride=2, padding= 0),
 
             Conv2DBlock(64, 128, kernel=1, stride=1, padding=0, atvn='prlu', bn = True, dropout=False),
@@ -40,7 +40,7 @@ class Model_CNN_0(nn.Module):
         self.encoder = seq1.block
         NN_size = int(seq1.flattend_size)
         self.classOut = nn.Sequential(Conv2DBlock(1024, 1 * 2, kernel=1, stride=1, padding=0, atvn=None, bn=False, dropout=False).block)
-        self.bboxOut = nn.Sequential(Conv2DBlock(1024, 1 * 5, kernel=1, stride=1, padding=0, atvn=None, bn=True, dropout=True).block)
+        self.bboxOut = nn.Sequential(Conv2DBlock(1024, 1 * 5, kernel=1, stride=1, padding=0, atvn='prlu', bn=True, dropout=True).block)
         self.init_w()
 
     def init_w(self):
