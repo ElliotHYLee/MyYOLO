@@ -6,7 +6,7 @@ class ToolBox():
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def np2gpu(self, x):
-        return torch.from_numpy(x).to(self.device)
+        return self.t2gpu(torch.from_numpy(x))
 
     def np2gpu_float(self, x):
         return self.np2gpu(x).type(torch.float)
@@ -15,7 +15,8 @@ class ToolBox():
         return x.to(self.device, dtype=torch.float)
 
     def gpu2np(self, x):
-        return x.cpu().numpy()
+        with torch.no_grad():
+            return x.cpu().numpy()
 
     def gpu2np_float(self, x):
         return (self.gpu2np(x)).astype(np.float)

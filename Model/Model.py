@@ -39,8 +39,8 @@ class Model_CNN_0(nn.Module):
         )
         self.encoder = seq1.block
         NN_size = int(seq1.flattend_size)
-        self.classOut = nn.Sequential(Conv2DBlock(1024, 5 * 100, kernel=1, stride=1, padding=0, atvn=None, bn=False, dropout=False).block)
-        self.bboxOut = nn.Sequential(Conv2DBlock(1024, 5 * 5, kernel=1, stride=1, padding=0, atvn=None, bn=True, dropout=True).block)
+        self.classOut = nn.Sequential(Conv2DBlock(1024, 1 * 2, kernel=1, stride=1, padding=0, atvn=None, bn=False, dropout=False).block)
+        self.bboxOut = nn.Sequential(Conv2DBlock(1024, 1 * 5, kernel=1, stride=1, padding=0, atvn=None, bn=True, dropout=True).block)
         self.init_w()
 
     def init_w(self):
@@ -58,10 +58,10 @@ class Model_CNN_0(nn.Module):
     def forward(self, img):
         input = torch.reshape(img, (-1, 3, 448, 448))
         x = self.encoder(input)
-        bboxOut = F.sigmoid(self.bboxOut(x))
-        bboxOut = torch.reshape(bboxOut, (-1, 7, 7, 5, 5))
+        bboxOut = torch.sigmoid(self.bboxOut(x))
+        bboxOut = torch.reshape(bboxOut, (-1, 7, 7, 1, 5))
         classOut = self.classOut(x)
-        classOut = torch.reshape(classOut, (-1, 7, 7, 5, 100)) # * bboxOut[:, :, :, :, 0, None]
+        classOut = torch.reshape(classOut, (-1, 7, 7, 1, 2)) # * bboxOut[:, :, :, :, 0, None]
         classOut = F.softmax(classOut, dim=4)
         return bboxOut, classOut
 
