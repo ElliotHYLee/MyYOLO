@@ -8,60 +8,64 @@ from Common.TooBox import ToolBox
 
 np.random.seed(999)
 numBoxes = 1
-w, h = 16 / 448.0, 16 / 448.0
+imgW = 416
+imgH = 416
+numGrid = 13
+gridWH = int(imgW / numGrid)
+bboxW, bboxH = 16 / imgW, 16 / imgH
 N = 32
 
 def id2oh(id):
     return [1, 0] if id == 0 else [0, 1]
 
-def darwGrids(imgs):
+def drawGrids(imgs):
     for n in range(0, N):
         img = imgs[n]
-        for i in range(0, 7): # vertical lines
-            startX = (i+1)*64
+        for i in range(0, numGrid): # vertical lines
+            startX = (i+1)*gridWH
             startY = 0
-            endX = (i+1)*64
+            endX = (i+1)*gridWH
             endY = int(img.shape[0])
             cv2.line(img, (startX, startY), (endX, endY), (255, 255, 255), 1, 1)
-        for i in range(0, 7): # horiz lines
+        for i in range(0, numGrid): # horiz lines
             startX = 0
-            startY = (i+1)*64
+            startY = (i+1)*gridWH
             endX = int(img.shape[1])
-            endY = (i+1)*64
+            endY = (i+1)*gridWH
             cv2.line(img, (startX, startY), (endX, endY), (255, 255, 255), 1, 1)
     return imgs
 
 def makeLabel():
-    label = np.zeros((N, 7, 7, numBoxes, 7))
+    label = np.zeros((N, numGrid, numGrid, numBoxes, 7))
     for n in range(0, N):
-        for i in range(0, 7):
-            for j in range(0, 7):
+        for i in range(0, numGrid):
+            for j in range(0, numGrid):
                 for b in range(0, numBoxes):
                     if np.random.rand(1) < 0.5:
                         label[n, i, j, b, 0:5] = np.array([0, 0, 0, 0, 0])
                     else:
                         x = np.random.rand(1)*0.6+0.2
                         y = np.random.rand(1)*0.6+0.2
-                        label[n, i, j, b, 0:5] = np.array([1, x, y, w, h])
+                        label[n, i, j, b, 0:5] = np.array([1, x, y, bboxW, bboxH])
                         id = 0 if np.random.rand(1) < 0.5 else 1
                         label[n, i, j, b, 5:7] = np.array(id2oh(id))
     return label
 
 def unpackLable(label):
-    bboxes = np.zeros((N, 49, 4))
+    bboxes = np.zeros((N, numGrid * numGrid, 4))
     bboxList = []
     xxx = 0
     for n in range(0, N):
-        for i in range(0, 7):
+        for i in range(0, numGrid):
             offsetX = i * 64
-            for j in range(0, 7):
+            for j in range(0, numGrid):
                 offsetY = j * 64
                 for b in range(0, numBoxes):
                     if label[n, i, j, b, 0] >= 0.5:
-                        width = label[n, i, j, b, 3] * 448
-                        height = label[n, i, j, b, 4] * 448
-                        x = offsetX + label[n, i, j, b, 1] * 64
-                        y = offsetY + label[n, i, j, b, 2] * 64
+                        width = label[n, i, j, b, 3] * imgW
+                        height = label[n, i, j, b, 4] * imgH
+                        x = offsetX + label[n, i, j, b, 1] * gridWH
+                        y = offsetY + label[n, i, j, b, 2] * gridWH
                         bboxList.append([x, y, width, height])
         xxx =  np.array(bboxList).shape[0]
         bboxes[n, 0:xxx, :] = np.array(bboxList)
@@ -69,7 +73,7 @@ def unpackLable(label):
     return bboxes
 
 def genImage(bboxes):
-    imgs = np.zeros((N, 448, 448, 3))
+    imgs = np.zeros((N, imgW, imgH, 3))
     for n in range(0, N):
         for i in range(0, bboxes.shape[1]):
             info = bboxes[n, i].astype(np.int)
