@@ -2,6 +2,7 @@ from main2_utils import *
 from Model.Model import *
 import time
 from torch.utils.data import Dataset, DataLoader
+import sys
 
 class MyDataSet(Dataset):
     def __init__(self, x, y):
@@ -27,9 +28,9 @@ def train(trainSet, validSet):
     output = 0
 
     tb  = ToolBox()
-
-    trainSetLoader = DataLoader(trainSet, batch_size=64)
-    validSetLoader = DataLoader(validSet, batch_size=64)
+    bn = 32
+    trainSetLoader = DataLoader(trainSet, batch_size=bn)
+    validSetLoader = DataLoader(validSet, batch_size=bn)
     for i in range(0, epoch):
         model.train()
         trainLoss, validLoss = 0, 0
@@ -46,6 +47,8 @@ def train(trainSet, validSet):
             optimizer.zero_grad()
             trainLoss.backward()
             optimizer.step()
+            msg = "===> Epoch[{}]({}/{}): Batch Loss: {:.4f}".format(i, (batch_idx+1)*bn, len(trainSet), trainLoss.item())
+            sys.stdout.write('\r' + msg)
 
         model.eval()
         for batch_idx, (input, target) in enumerate(validSetLoader):
@@ -59,7 +62,7 @@ def train(trainSet, validSet):
 
             validLoss = lossMSE(p_prob, prob) + lossMSE(p_xy, xy)
 
-        print('epoch: {0}, trainLoss: {1}, validLoss: {2}'.format(i,
+        print('\nepoch: {0}, trainLoss: {1}, validLoss: {2}'.format(i,
                      np.round(trainLoss.item(), 7),
                      np.round(validLoss.item(), 7)))
         torch.save({'model_state_dict': model.state_dict(),
@@ -75,7 +78,7 @@ def test(imgs, bboxesGT, testSet):
 
     tb = ToolBox()
 
-    testSetLoader = DataLoader(testSet, batch_size=64)
+    testSetLoader = DataLoader(testSet, batch_size=32)
     outputList = []
     for batch_idx, (input, target) in enumerate(testSetLoader):
         input, target = tb.t2gpu(input), tb.t2gpu(target)
@@ -101,7 +104,7 @@ def test(imgs, bboxesGT, testSet):
 if __name__ == '__main__':
     print('making labels...')
     s = time.time()
-    N = 10000
+    N = 10**4
     lm = LabelMaker(N)
     label = lm.makeLabel()
     bboxes = lm.unpackLable(label)
