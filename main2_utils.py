@@ -7,16 +7,20 @@ from Model.Model import Model_CNN_0
 from Common.TooBox import ToolBox
 
 np.random.seed(999)
-numBoxes = 1
-imgW = 416
-imgH = 416
-numGrid = 13
+numBoxes = 2
+imgW = 448
+imgH = 448
+numGrid = 7
 gridWH = int(imgW / numGrid)
 bboxW, bboxH = 16 / imgW, 16 / imgH
-N = 32
+N = 64
+numClass = 20
+featureDim = 2*5 + numClass
 
 def id2oh(id):
-    return [1, 0] if id == 0 else [0, 1]
+    result = np.zeros((numClass))
+    result[id] = 1
+    return result
 
 def drawGrids(imgs):
     for n in range(0, N):
@@ -36,19 +40,18 @@ def drawGrids(imgs):
     return imgs
 
 def makeLabel():
-    label = np.zeros((N, numGrid, numGrid, numBoxes, 7))
+    label = np.zeros((N, numGrid, numGrid, featureDim))
     for n in range(0, N):
         for i in range(0, numGrid):
             for j in range(0, numGrid):
-                for b in range(0, numBoxes):
-                    if np.random.rand(1) < 0.5:
-                        label[n, i, j, b, 0:5] = np.array([0, 0, 0, 0, 0])
-                    else:
-                        x = np.random.rand(1)*0.6+0.2
-                        y = np.random.rand(1)*0.6+0.2
-                        label[n, i, j, b, 0:5] = np.array([1, x, y, bboxW, bboxH])
-                        id = 0 if np.random.rand(1) < 0.5 else 1
-                        label[n, i, j, b, 5:7] = np.array(id2oh(id))
+                if np.random.rand(1) >= 0.5:
+                    feature = np.zeros((30))
+                    x = np.random.rand(1) * 0.6 + 0.2
+                    y = np.random.rand(1) * 0.6 + 0.2
+                    feature[0:5]  = np.array([1, x, y, bboxW, bboxH])
+                    id = 0 if np.random.rand(1) < 0.5 else 1
+                    feature[10:] = id2oh(id)
+                    label[n, i, j] = feature
     return label
 
 def unpackLable(label):
@@ -60,13 +63,12 @@ def unpackLable(label):
             offsetX = i * 64
             for j in range(0, numGrid):
                 offsetY = j * 64
-                for b in range(0, numBoxes):
-                    if label[n, i, j, b, 0] >= 0.5:
-                        width = label[n, i, j, b, 3] * imgW
-                        height = label[n, i, j, b, 4] * imgH
-                        x = offsetX + label[n, i, j, b, 1] * gridWH
-                        y = offsetY + label[n, i, j, b, 2] * gridWH
-                        bboxList.append([x, y, width, height])
+                if label[n, i, j, 0] >= 0.5:
+                    width = label[n, i, j, 3] * imgW
+                    height = label[n, i, j, 4] * imgH
+                    x = offsetX + label[n, i, j, 1] * gridWH
+                    y = offsetY + label[n, i, j, 2] * gridWH
+                    bboxList.append([x, y, width, height])
         xxx =  np.array(bboxList).shape[0]
         bboxes[n, 0:xxx, :] = np.array(bboxList)
         bboxList = []
@@ -81,7 +83,7 @@ def genImage(bboxes):
             if x<=0 and y <=0:
                 continue
             else:
-                imgs[n] = cv2.circle(imgs[n], (x, y), 14, (0, 255, 0), -1)
+                imgs[n] = cv2.circle(imgs[n], (x, y), 7, (0, 255, 0), -1)
     return imgs
 
 def drawRect(imgs, bboxes, isGT=True):
