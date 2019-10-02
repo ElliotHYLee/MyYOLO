@@ -1,39 +1,71 @@
 from main2_utils import *
 from Model.Model import *
+import time
+from torch.utils.data import Dataset, DataLoader
 
+class MyDataSet(Dataset):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
-def train(label, bboxes, imgs):
+    def __getitem__(self, i):
+        return self.x[i], self.y[i]
+
+    def __len__(self):
+        return self.x.shape[0]
+
+def train(trainSet, validSet):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     model = YOLO_V1()
     model = nn.DataParallel(model).to(device)
-    model.train()
+
+    epoch = 10**5
+    optimizer = torch.optim.SGD(model.parameters(), lr=10 **-3, weight_decay= 0)
+    lossMSE = nn.modules.loss.MSELoss()
+
+    output = 0
 
     tb  = ToolBox()
-    input = tb.np2gpu(imgs.copy())
-    target = tb.np2gpu(label)
-    epoch = 10**3
-    optimizer = torch.optim.SGD(model.parameters(), lr=10 ** -2, weight_decay= 0)
-    lossMSE = nn.modules.loss.MSELoss()
-    output = 0
+
+    trainSetLoader = DataLoader(trainSet, batch_size=64)
+    validSetLoader = DataLoader(validSet, batch_size=64)
     for i in range(0, epoch):
-        output = model.forward(input)
-        p_prob = output[:, :, :, 0]
-        prob = target[:, :, :, 0]
+        model.train()
+        trainLoss, validLoss = 0, 0
+        for batch_idx, (input, target) in enumerate(trainSetLoader):
+            input, target = tb.t2gpu(input), tb.t2gpu(target)
+            output = model.forward(input)
+            p_prob = output[:, :, :, 0]
+            prob = target[:, :, :, 0]
 
-        p_xy = output[:, :, :, 1:3]
-        xy = target[:, :, :, 1:3]
+            p_xy = output[:, :, :, 1:3]
+            xy = target[:, :, :, 1:3]
 
-        loss = lossMSE(p_prob, prob) + lossMSE(p_xy, xy)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        print('epoch: {0}, loss: {1}'.format(i, loss.item()))
+            trainLoss = lossMSE(p_prob, prob) + lossMSE(p_xy, xy)
+            optimizer.zero_grad()
+            trainLoss.backward()
+            optimizer.step()
 
-    torch.save({'model_state_dict': model.state_dict(),
-                'model_optim_state': optimizer.state_dict()}, 'asdf.pt')
+        model.eval()
+        for batch_idx, (input, target) in enumerate(validSetLoader):
+            input, target = tb.t2gpu(input), tb.t2gpu(target)
+            output = model.forward(input)
+            p_prob = output[:, :, :, 0]
+            prob = target[:, :, :, 0]
 
-def test(label, bboxes, imgs):
+            p_xy = output[:, :, :, 1:3]
+            xy = target[:, :, :, 1:3]
+
+            validLoss = lossMSE(p_prob, prob) + lossMSE(p_xy, xy)
+
+        print('epoch: {0}, trainLoss: {1}, validLoss: {2}'.format(i,
+                     np.round(trainLoss.item(), 7),
+                     np.round(validLoss.item(), 7)))
+        torch.save({'model_state_dict': model.state_dict(),
+                    'model_optim_state': optimizer.state_dict()}, 'asdf.pt')
+
+def test(imgs, bboxesGT, testSet):
     cp = torch.load('asdf.pt')
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model = YOLO_V1()
@@ -42,27 +74,50 @@ def test(label, bboxes, imgs):
     model.eval()
 
     tb = ToolBox()
-    input = tb.np2gpu(imgs.copy())
-    #target = tb.np2gpu(label)
 
-    output = model.forward(input)
+    testSetLoader = DataLoader(testSet, batch_size=64)
+    outputList = []
+    for batch_idx, (input, target) in enumerate(testSetLoader):
+        input, target = tb.t2gpu(input), tb.t2gpu(target)
+        output = model.forward(input)
+        outputList.append(tb.gpu2np(output))
 
-    p_label = tb.gpu2np_float(output)
-    p_bboxes = unpackLable(p_label)
+
+    p_label = np.concatenate(outputList, axis=0)
+    lm = LabelMaker(N)
+
+
+    p_bboxes = lm.unpackLable(p_label)
     p_bboxes[:,:, 2:] = 16
 
-    imgs = drawRect(imgs, bboxes)
-    imgs = drawRect(imgs, p_bboxes, False)
+    imgs = lm.drawRect(imgs, bboxesGT)
+    imgs = lm.drawRect(imgs, p_bboxes, False)
     #imgs = drawGrids(imgs)
 
-    for i in range(0, 32):
+    for i in range(0, imgs.shape[0]):
         cv2.imshow('asdf', imgs[i])
         cv2.waitKey(10000)
 
 if __name__ == '__main__':
-    label = makeLabel()
-    bboxes = unpackLable(label)
-    imgs = genImage(bboxes)/255.0
-    #train(label, bboxes, imgs)
-    test(label, bboxes, imgs)
+    print('making labels...')
+    s = time.time()
+    N = 10000
+    lm = LabelMaker(N)
+    label = lm.makeLabel()
+    bboxes = lm.unpackLable(label)
+    imgs = (lm.genImage(bboxes)/255.0).astype(np.float32)
+
+    wallA = int(N*0.8)
+    wallB = int(N*0.9)
+
+    trainSet = MyDataSet(imgs[:wallA], label[:wallA])
+    validSet = MyDataSet(imgs[wallA:wallB], label[wallA:wallB])
+    testSet = MyDataSet(imgs[wallB:], label[wallB:])
+
+    print(time.time() - s)
+    print('done making')
+
+
+    train(trainSet, validSet)
+    test(imgs[wallB:], bboxes[wallB:], testSet)
 
