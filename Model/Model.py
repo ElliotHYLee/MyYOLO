@@ -75,9 +75,10 @@ class Flatten(nn.Module):
 
 
 class YOLO_V1(nn.Module):
-    def __init__(self):
+    def __init__(self, numGrid = 7):
         super(YOLO_V1, self).__init__()
         C = 20  # number of classes
+        self.numGrid = numGrid
         self.conv_layer1 = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=7 // 2),
             nn.BatchNorm2d(64),
@@ -107,7 +108,7 @@ class YOLO_V1(nn.Module):
             nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1, stride=1, padding=1 // 2),
             nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, stride=1, padding=3 // 2),
             nn.Conv2d(in_channels=512, out_channels=512, kernel_size=1, stride=1, padding=1 // 2),
-            nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=3 // 2),
+            nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=2, padding=3 // 2),
             nn.BatchNorm2d(1024),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
@@ -117,7 +118,7 @@ class YOLO_V1(nn.Module):
             nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=1, stride=1, padding=1 // 2),
             nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=3 // 2),
             nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=3 // 2),
-            nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=2, padding=3 // 2),
+            nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=3 // 2),
             nn.BatchNorm2d(1024),
             nn.LeakyReLU(0.1),
         )
@@ -129,14 +130,14 @@ class YOLO_V1(nn.Module):
         )
         self.flatten = Flatten()
         self.conn_layer1 = nn.Sequential(
-            nn.Linear(in_features=7 * 7 * 1024, out_features=4096),
+            nn.Linear(in_features= self.numGrid * self.numGrid * 1024, out_features=4096),
             nn.Dropout(),
             nn.LeakyReLU(0.1)
         )
-        self.conn_layer2 = nn.Sequential(nn.Linear(in_features=4096, out_features=7 * 7 * (2 * 5 + C)))
+        self.conn_layer2 = nn.Sequential(nn.Linear(in_features=4096, out_features= self.numGrid * self.numGrid * (2 * 5 + C)))
 
-    def forward(self, input):
-        input = torch.reshape(input, (-1, 3, 448, 448))
+    def forward(self, input, imgW=448, imgH=448):
+        input = torch.reshape(input, (-1, 3, imgW, imgH))
         conv_layer1 = self.conv_layer1(input)
         conv_layer2 = self.conv_layer2(conv_layer1)
         conv_layer3 = self.conv_layer3(conv_layer2)
@@ -146,15 +147,16 @@ class YOLO_V1(nn.Module):
         flatten = self.flatten(conv_layer6)
         conn_layer1 = self.conn_layer1(flatten)
         output = self.conn_layer2(conn_layer1)
-        output = output.view(-1, 7, 7, 30)
+        output = output.view(-1, self.numGrid, self.numGrid, 30)
         output[:,:,:,0:10] = torch.sigmoid(output[:,:,:,0:10])
         return output
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     m = nn.DataParallel(YOLO_V1()).to(device)
-    img1 = torch.ones((10, 3, 448, 448), dtype=torch.float).cuda()
+    img1 = torch.ones((10, 3, 416, 416), dtype=torch.float).cuda()
     y = m.forward(img1)
+    print(y.shape)
 
     #bboxOut, classOut= m.forward(img1)
     # print(bboxOut.shape)

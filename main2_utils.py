@@ -9,7 +9,7 @@ from Common.TooBox import ToolBox
 np.random.seed(999)
 numBoxes = 2
 imgW = 448
-imgH = 448
+imgH = imgW
 numGrid = 7
 gridWH = int(imgW / numGrid)
 bboxW, bboxH = 16 / imgW, 16 / imgH
@@ -26,7 +26,7 @@ class LabelMaker():
         return result
 
     def drawGrids(self, imgs):
-        for n in range(0, self.N):
+        for n in range(0, imgs.shape[0]):
             img = imgs[n]
             for i in range(0, numGrid): # vertical lines
                 startX = (i+1)*gridWH
@@ -49,8 +49,8 @@ class LabelMaker():
                 for j in range(0, numGrid):
                     if np.random.rand(1) >= 0.5:
                         feature = np.zeros((30))
-                        x = np.random.rand(1) * 0.6 + 0.2
-                        y = np.random.rand(1) * 0.6 + 0.2
+                        x = np.random.rand(1) * 0.8 + 0.1
+                        y = np.random.rand(1) * 0.8 + 0.1
                         feature[0:5]  = np.array([1, x, y, bboxW, bboxH])
                         id = 0 if np.random.rand(1) < 0.5 else 1
                         feature[10:] = self.id2oh(id)

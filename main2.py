@@ -16,14 +16,19 @@ class MyDataSet(Dataset):
         return self.x.shape[0]
 
 def train(trainSet, validSet):
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    model = YOLO_V1()
-    model = nn.DataParallel(model).to(device)
+    model = YOLO_V1(numGrid = 7)
+    model = nn.DataParallel(model, device_ids=[0, 1]).to(device)
 
     epoch = 10**5
     optimizer = torch.optim.SGD(model.parameters(), lr=10 **-3, weight_decay= 0)
     lossMSE = nn.modules.loss.MSELoss()
+
+    # cp = torch.load('asdf1313.pt')
+    # model.load_state_dict(cp['model_state_dict'])
+    # optimizer.load_state_dict(cp['model_optim_state'])
 
     output = 0
 
@@ -66,7 +71,7 @@ def train(trainSet, validSet):
                      np.round(trainLoss.item(), 7),
                      np.round(validLoss.item(), 7)))
         torch.save({'model_state_dict': model.state_dict(),
-                    'model_optim_state': optimizer.state_dict()}, 'asdf.pt')
+                    'model_optim_state': optimizer.state_dict()}, 'asdf1313.pt')
 
 def test(imgs, bboxesGT, testSet):
     cp = torch.load('asdf.pt')
@@ -95,20 +100,27 @@ def test(imgs, bboxesGT, testSet):
 
     imgs = lm.drawRect(imgs, bboxesGT)
     imgs = lm.drawRect(imgs, p_bboxes, False)
-    #imgs = drawGrids(imgs)
+    imgs = lm.drawGrids(imgs)
 
     for i in range(0, imgs.shape[0]):
-        cv2.imshow('asdf', imgs[i])
+        img = np.round(imgs[i]*255)
+        #print(img.shape)
+        #cv2.imwrite('Results/img' + str(i) + '.png', img)
+        # print(i)
+        cv2.imshow('asdf', img)
         cv2.waitKey(10000)
 
 if __name__ == '__main__':
     print('making labels...')
     s = time.time()
-    N = 10**4
+    N = 10**2
     lm = LabelMaker(N)
     label = lm.makeLabel()
     bboxes = lm.unpackLable(label)
-    imgs = (lm.genImage(bboxes)/255.0).astype(np.float32)
+    imgs = (lm.genImage(bboxes) / 255.0).astype(np.float32)
+    #imgs = lm.drawGrids(imgs)
+    # cv2.imshow('asdf', imgs[0])
+    # cv2.waitKey(10000)
 
     wallA = int(N*0.8)
     wallB = int(N*0.9)
@@ -119,7 +131,6 @@ if __name__ == '__main__':
 
     print(time.time() - s)
     print('done making')
-
 
     train(trainSet, validSet)
     test(imgs[wallB:], bboxes[wallB:], testSet)
