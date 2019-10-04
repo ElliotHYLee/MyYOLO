@@ -14,7 +14,7 @@ def test():
     visG = Visualizer_Global()
 
     dm = YOLODataSetManager(start=0, N=16, isTrain=False)
-    mc = ModelContainer_YOLO(YOLO_V1(), wName='Weights/main_best.pt')
+    mc = ModelContainer_YOLO(Model_CNN_0(), wName='Weights/main_best.pt')
     dataSet = dm.testSet
     trainLoader = DataLoader(dataset=dataSet, batch_size=8)
     y = mc.predict(dm, batch_size=8)
